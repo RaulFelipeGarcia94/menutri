@@ -4,6 +4,12 @@ import connect from "@/app/utils/db";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { NextAuthOptions } from "next-auth";
 
+// Interface para as credenciais
+interface Credentials {
+  email: string;
+  password: string;
+}
+
 export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
@@ -13,9 +19,14 @@ export const authOptions: NextAuthOptions = {
         email: { label: "Email", type: "text" },
         password: { label: "Password", type: "password" },
       },
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      async authorize(credentials: any) {
+      async authorize(credentials: Credentials | undefined) {
+        // Verifica se as credenciais foram fornecidas
+        if (!credentials) {
+          throw new Error("Credentials not provided");
+        }
+
         await connect();
+
         try {
           const user = await User.findOne({ email: credentials.email });
           if (user) {
@@ -25,13 +36,19 @@ export const authOptions: NextAuthOptions = {
             );
             if (isPasswordCorrect) {
               return user;
+            } else {
+              throw new Error("Invalid credentials");
             }
+          } else {
+            throw new Error("User not found");
           }
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        } catch (err: any) {
+        } catch (err) {
           console.log(err);
-
-          throw new Error(err);
+          throw new Error(
+            `Authorization error: ${
+              err instanceof Error ? err.message : "Unknown error"
+            }`
+          );
         }
       },
     }),
