@@ -6,6 +6,7 @@ import { getServerSession } from "next-auth";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { LoadingProvider } from "./contexts/Loading";
+import Loading from "./components/Loading";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -36,6 +37,7 @@ export default async function RootLayout({
       >
         <AuthProvider session={session}>
           <LoadingProvider>{children}</LoadingProvider>
+          <Loading />
         </AuthProvider>
 
         <ToastContainer />

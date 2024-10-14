@@ -26,6 +26,7 @@ export default function Login({ open, onClose }: IOpenModal) {
 
       if (res?.ok) {
         Toast("success", "Login efetuado com sucesso!");
+        onClose();
       } else if (res?.error) {
         Toast("error", "E-mail ou senha inválidos");
         if (res?.url) router.replace("/");
@@ -39,7 +40,9 @@ export default function Login({ open, onClose }: IOpenModal) {
   };
 
   return (
-    <dialog className={`${open && "modal-open"} modal modal-bottom`}>
+    <dialog
+      className={`${open && "modal-open"} modal modal-bottom md:modal-middle`}
+    >
       <div className="modal-box flex h-[600px] flex-col items-center gap-4">
         <h1 className="text-2xl font-bold text-primary text-center">Login</h1>
         <h2 className="text-primary text-center">

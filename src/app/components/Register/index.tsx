@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { IOpenModal } from "@/app/types";
 import InputDefault from "../InputDefault";
 import { useLoading } from "@/app/contexts/Loading";
+import { Toast } from "@/app/lib/Toast";
 
 export default function Register({ open, onClose }: IOpenModal) {
   const { setIsLoading } = useLoading();
@@ -38,7 +39,10 @@ export default function Register({ open, onClose }: IOpenModal) {
         body: JSON.stringify({ name, email, password }),
       });
 
-      if (res.status === 400) {
+      if (res?.ok) {
+        Toast("success", "Cadastro efetuado com sucesso!");
+        onClose();
+      } else if (res.status === 400) {
         setError("Este email já está registrado");
       } else if (res.status === 200) {
         setError("");
@@ -53,7 +57,9 @@ export default function Register({ open, onClose }: IOpenModal) {
   };
 
   return (
-    <dialog className={`${open && "modal-open"} modal modal-bottom`}>
+    <dialog
+      className={`${open && "modal-open"} modal modal-bottom md:modal-middle`}
+    >
       <div className="modal-box flex h-[600px] flex-col items-center gap-4">
         <h1 className="text-2xl font-bold text-primary text-center">
           Cadastro
