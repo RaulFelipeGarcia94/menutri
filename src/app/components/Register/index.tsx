@@ -60,7 +60,7 @@ export default function Register({ open, onClose }: IOpenModal) {
     <dialog
       className={`${open && "modal-open"} modal modal-bottom md:modal-middle`}
     >
-      <div className="modal-box flex h-[600px] flex-col items-center gap-4">
+      <div className="modal-box flex h-[600px] flex-col items-center md:justify-center gap-4">
         <h1 className="text-2xl font-bold text-primary text-center">
           Cadastro
         </h1>

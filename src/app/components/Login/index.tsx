@@ -43,7 +43,7 @@ export default function Login({ open, onClose }: IOpenModal) {
     <dialog
       className={`${open && "modal-open"} modal modal-bottom md:modal-middle`}
     >
-      <div className="modal-box flex h-[600px] flex-col items-center gap-4">
+      <div className="modal-box flex h-[600px] flex-col items-center md:justify-center gap-4">
         <h1 className="text-2xl font-bold text-primary text-center">Login</h1>
         <h2 className="text-primary text-center">
           Bem-vindo de volta! Informe seus dados.
