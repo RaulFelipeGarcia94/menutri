@@ -2,14 +2,9 @@ import bcrypt from "bcryptjs";
 import User from "@/app/models/User";
 import connect from "@/app/utils/db";
 import CredentialsProvider from "next-auth/providers/credentials";
-import NextAuth, { NextAuthOptions } from "next-auth";
+import { NextAuthOptions } from "next-auth";
 
-interface Credentials {
-  email: string;
-  password: string;
-}
-
-const authOptions: NextAuthOptions = {
+export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
       id: "credentials",
@@ -18,13 +13,9 @@ const authOptions: NextAuthOptions = {
         email: { label: "Email", type: "text" },
         password: { label: "Password", type: "password" },
       },
-      async authorize(credentials: Credentials | undefined) {
-        if (!credentials) {
-          throw new Error("Credentials not provided");
-        }
-
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      async authorize(credentials: any) {
         await connect();
-
         try {
           const user = await User.findOne({ email: credentials.email });
           if (user) {
@@ -34,23 +25,15 @@ const authOptions: NextAuthOptions = {
             );
             if (isPasswordCorrect) {
               return user;
-            } else {
-              throw new Error("Invalid credentials");
             }
-          } else {
-            throw new Error("User not found");
           }
-        } catch (err) {
-          throw new Error(`Authorization error: ${err}`);
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } catch (err: any) {
+          console.log(err);
+
+          throw new Error(err);
         }
       },
     }),
   ],
-  pages: {
-    signIn: "/auth/signin",
-    error: "/auth/error",
-  },
 };
-
-const handler = NextAuth(authOptions);
-export { handler as GET, handler as POST };
