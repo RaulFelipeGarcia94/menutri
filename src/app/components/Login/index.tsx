@@ -12,7 +12,6 @@ export default function Login({ open, onClose }: IOpenModal) {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -30,8 +29,6 @@ export default function Login({ open, onClose }: IOpenModal) {
       } else if (res?.error) {
         Toast("error", "E-mail ou senha inválidos");
         if (res?.url) router.replace("/");
-      } else {
-        setError("");
       }
     } catch (error) {
       Toast("error", "Ocorreu um erro ao tentar fazer login");

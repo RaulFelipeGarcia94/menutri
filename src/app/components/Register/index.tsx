@@ -106,6 +106,7 @@ export default function Register({ open, onClose }: IOpenModal) {
           <button className="btn btn-primary w-full text-white" type="submit">
             Criar conta
           </button>
+          <p className="text-red-600">{error && error}</p>
         </form>
       </div>
       <span className="modal-backdrop" onClick={onClose} />
