@@ -7,6 +7,7 @@ import { IOpenModal } from "../types";
 import InputDefault from "../components/InputDefault";
 import { LogOut, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 interface ICreateMenu extends IOpenModal {
   type: string;
@@ -18,6 +19,88 @@ export interface IItemMenu {
   name: string;
   description: string;
 }
+
+const ChangesItemMenu = ({
+  open,
+  onClose,
+  item,
+}: IOpenModal & { item: IItemMenu }) => {
+  // const [prompt, setPrompt] = useState("");
+  const [response, setResponse] = useState("");
+
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    try {
+      const res = await fetch("/api/openai", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ item: item.name }),
+      });
+
+      const data = await res.json();
+      setResponse(data.options);
+    } catch (error) {
+      console.error("Erro:", error);
+      setResponse("Erro ao obter resposta da IA");
+    }
+  };
+
+  const handleCloseModal = () => {
+    setResponse("");
+    onClose();
+  };
+
+  return (
+    <dialog
+      className={`${open && "modal-open"} modal modal-bottom md:modal-middle`}
+    >
+      <div className="modal-box flex h-[600px] flex-col items-center md:justify-center gap-4">
+        <div className="w-full flex">
+          <Image
+            src="https://cdn-icons-png.flaticon.com/512/8214/8214530.png"
+            width={150}
+            height={150}
+            alt="Image da nossa IA"
+          />
+          {response ? (
+            <div>
+              <p className="font-semibold">Aqui está:</p>
+              <p className="font-semibold">
+                {response.split("\n").map((line, index) => (
+                  <span key={index}>
+                    {line}
+                    <br />
+                  </span>
+                ))}
+              </p>
+            </div>
+          ) : (
+            <p className="font-semibold">
+              Olá! Sou a Fran, sua nutricionista IA particular, clique em GERAR
+              que vou te dar 3 opções para substituir seu item.
+            </p>
+          )}
+        </div>
+        <form
+          className="space-y-5 flex flex-col items-center w-full max-w-lg"
+          onSubmit={handleSubmit}
+        >
+          {/* <InputDefault
+            type="text"
+            className="grow !text-black"
+            placeholder="Item"
+            value={prompt}
+            onChange={(e) => setPrompt(e.target.value)}
+          /> */}
+          <button className="btn btn-primary w-full text-white" type="submit">
+            GERAR
+          </button>
+        </form>
+      </div>
+      <span className="modal-backdrop" onClick={handleCloseModal} />
+    </dialog>
+  );
+};
 
 const CreateMenu = ({ type, open, onClose, onItemAdded }: ICreateMenu) => {
   const { setIsLoading } = useLoading();
@@ -52,7 +135,7 @@ const CreateMenu = ({ type, open, onClose, onItemAdded }: ICreateMenu) => {
         const newItem = await res.json();
         Toast("success", "Cadastro efetuado com sucesso!");
         onItemAdded(newItem);
-        onClose();
+        handleCloseModal();
       } else {
         const errorText = await res.text();
         console.error("Error response:", errorText);
@@ -63,6 +146,12 @@ const CreateMenu = ({ type, open, onClose, onItemAdded }: ICreateMenu) => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleCloseModal = () => {
+    setNameItem("");
+    setDescriptionItem("");
+    onClose();
   };
 
   return (
@@ -92,7 +181,7 @@ const CreateMenu = ({ type, open, onClose, onItemAdded }: ICreateMenu) => {
           </button>
         </form>
       </div>
-      <span className="modal-backdrop" onClick={onClose} />
+      <span className="modal-backdrop" onClick={handleCloseModal} />
     </dialog>
   );
 };
@@ -102,10 +191,12 @@ export default function Menu() {
   const router = useRouter();
   const [activeMenuType, setActiveMenuType] = useState<string>("breakfast");
   const [openCreateMenu, setOpenCreateMenu] = useState(false);
+  const [openChangesItemMenu, setOpenChangesItemMenu] = useState(false);
   const [menuItems, setMenuItems] = useState<{ [key: string]: IItemMenu[] }>(
     {}
   );
   const [filteredItems, setFilteredItems] = useState<IItemMenu[]>([]);
+  const [selectedItem, setSelectedItem] = useState<IItemMenu | null>(null);
 
   const handleMenuTypeClick = (type: string) => {
     setActiveMenuType(type);
@@ -293,7 +384,13 @@ export default function Menu() {
                 <h2 className="card-title">{item.name}</h2>
                 <p>{item.description}</p>
                 <div className="card-actions justify-center mt-4">
-                  <button className="btn btn-ghost text-white p-0 h-0 min-h-0">
+                  <button
+                    onClick={() => {
+                      setSelectedItem(item);
+                      setOpenChangesItemMenu(true);
+                    }}
+                    className="btn btn-ghost text-white p-0 h-0 min-h-0"
+                  >
                     Ver opções
                   </button>
                 </div>
@@ -315,6 +412,13 @@ export default function Menu() {
         type={activeMenuType}
         onItemAdded={handleItemAdded}
       />
+      {selectedItem && (
+        <ChangesItemMenu
+          open={openChangesItemMenu}
+          onClose={() => setOpenChangesItemMenu(false)}
+          item={selectedItem}
+        />
+      )}
     </div>
   );
 }
