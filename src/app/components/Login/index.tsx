@@ -26,6 +26,7 @@ export default function Login({ open, onClose }: IOpenModal) {
 
       if (res?.ok) {
         Toast("success", "Login efetuado com sucesso!");
+        router.push("/cardapio");
         onClose();
       } else if (res?.error) {
         Toast("error", "E-mail ou senha inválidos");

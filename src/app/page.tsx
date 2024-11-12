@@ -2,13 +2,23 @@
 import Image from "next/image";
 import imageHome from "@/app/assets/img/image-home.svg";
 import logo from "@/app/assets/img/logo.svg";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Login from "./components/Login";
 import Register from "./components/Register";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
+  const router = useRouter();
   const [openLogin, setOpenLogin] = useState(false);
   const [openRegister, setOpenRegister] = useState(false);
+  const { status } = useSession();
+
+  useEffect(() => {
+    if (status === "authenticated") {
+      router.push("/cardapio");
+    }
+  }, [router, status]);
 
   return (
     <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)] relative">
@@ -31,7 +41,7 @@ export default function Home() {
           <h1 className="text-primary md:hidden">
             O lugar perfeito para registrar sua dieta
           </h1>
-          <h1 className="text-white hidden md:block text-4xl font-bold">
+          <h1 className="text-white text-2xl hidden md:block lg:text-4xl font-bold text-center">
             Bem-vindo ao MENUTRI
           </h1>
           <h2 className="text-white hidden md:block text-center text-lg font-medium">
