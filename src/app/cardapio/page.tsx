@@ -1,11 +1,11 @@
 "use client";
 import { FormEvent, useEffect, useState } from "react";
-import { useSession } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import { useLoading } from "../contexts/Loading";
 import { Toast } from "../lib/Toast";
 import { IOpenModal } from "../types";
 import InputDefault from "../components/InputDefault";
-import { Trash2 } from "lucide-react";
+import { LogOut, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 interface ICreateMenu extends IOpenModal {
@@ -112,6 +112,17 @@ export default function Menu() {
     setFilteredItems(menuItems[type] || []);
   };
 
+  const handleLogout = async () => {
+    try {
+      await signOut({ redirect: false });
+      Toast("success", "Logout efetuado com sucesso!");
+      router.push("/"); // Redireciona para a página inicial ou qualquer outra página
+    } catch (error) {
+      Toast("error", "Ocorreu um erro ao tentar fazer logout");
+      console.error("Erro no logout:", error);
+    }
+  };
+
   const handleItemAdded = (newItem: IItemMenu) => {
     setMenuItems((prevItems) => {
       const updatedItems = { ...prevItems };
@@ -186,8 +197,13 @@ export default function Menu() {
   return (
     <div>
       <div className="w-full flex flex-col items-center py-6 pl-3 bg-primary">
-        <h1 className="text-lg text-white font-semibold mb-4">Cardápio</h1>
-        <div className="flex gap-4 overflow-x-auto whitespace-nowrap w-full">
+        <div className="relative w-full flex justify-center">
+          <h1 className="text-lg text-white font-semibold mb-4">Cardápio</h1>
+          <button className="absolute right-10 top-0" onClick={handleLogout}>
+            <LogOut color="white" />
+          </button>
+        </div>
+        <div className="flex gap-4 overflow-x-auto md:justify-center whitespace-nowrap w-full">
           <button
             className={`btn flex-shrink-0 p-3 ${
               activeMenuType === "breakfast"
@@ -250,31 +266,30 @@ export default function Menu() {
           </button>
         </div>
       </div>
-      <div className="p-6 gap-8 flex flex-col">
+      <div className="p-6 gap-8 flex flex-col w-full items-center">
         {filteredItems.length > 0 &&
           filteredItems.map((item) => (
             <div
               key={item._id}
-              className="card bg-primary text-white shadow-xl"
+              className="card bg-primary text-white shadow-xl w-full max-w-xl"
             >
               <div className="card-body">
-                <span>
-                  <button
-                    onClick={() => {
-                      if (session) {
-                        handleDeleteItem(
-                          session.user.id,
-                          activeMenuType,
-                          item._id
-                        );
-                      } else {
-                        Toast("error", "Usuário não autenticado.");
-                      }
-                    }}
-                  >
-                    <Trash2 />
-                  </button>
-                </span>
+                <button
+                  className="absolute top-6 right-6"
+                  onClick={() => {
+                    if (session) {
+                      handleDeleteItem(
+                        session.user.id,
+                        activeMenuType,
+                        item._id
+                      );
+                    } else {
+                      Toast("error", "Usuário não autenticado.");
+                    }
+                  }}
+                >
+                  <Trash2 />
+                </button>
                 <h2 className="card-title">{item.name}</h2>
                 <p>{item.description}</p>
                 <div className="card-actions justify-center mt-4">
