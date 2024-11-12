@@ -2,11 +2,23 @@ import bcrypt from "bcryptjs";
 import User from "@/app/models/User";
 import connect from "@/app/utils/db";
 import CredentialsProvider from "next-auth/providers/credentials";
-import NextAuth, { NextAuthOptions } from "next-auth";
+import NextAuth, { DefaultSession, NextAuthOptions } from "next-auth";
+import { ObjectId } from "mongoose";
 
 interface Credentials {
   email: string;
   password: string;
+}
+
+declare module "next-auth" {
+  interface Session {
+    user: {
+      id: string;
+    } & DefaultSession["user"];
+  }
+  interface JWT {
+    id: string;
+  }
 }
 
 const authOptions: NextAuthOptions = {
@@ -33,7 +45,7 @@ const authOptions: NextAuthOptions = {
               user.password
             );
             if (isPasswordCorrect) {
-              return user;
+              return user; // Retorna o objeto user diretamente
             } else {
               throw new Error("Invalid credentials");
             }
@@ -49,6 +61,25 @@ const authOptions: NextAuthOptions = {
   pages: {
     signIn: "/auth/signin",
     error: "/auth/error",
+  },
+  callbacks: {
+    async session({ session, token }) {
+      if (session.user && token.id) {
+        session.user.id = token.id as string;
+      }
+      return session;
+    },
+    async jwt({ token, user }) {
+      if (user) {
+        const dbUser = user as typeof user & { _id: ObjectId }; // Asserção de tipo
+        token.id = dbUser._id.toString();
+      }
+      return token;
+    },
+  },
+
+  session: {
+    strategy: "jwt",
   },
 };
 
