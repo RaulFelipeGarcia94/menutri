@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
           content: [
             {
               type: "text",
-              text: `Responda em português: Liste apenas 3 alimentos comestíveis comuns e fáceis de encontrar, sem descrição, sem início de resposta, com apenas o nome e número listando, para substituir o ${item} seguindo uma dieta de uma nutricionista.`,
+              text: `Responda em português: Liste apenas 3 alimentos comestíveis comuns e fáceis de encontrar com a quantidade de cada um, sem descrição, sem início de resposta, com apenas o nome e número listando, para substituir o ${item} seguindo uma dieta de uma nutricionista.`,
             },
           ],
         },
